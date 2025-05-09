@@ -1,35 +1,119 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#1e1e2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#1e1e2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
-  <title>Secure Bridge Dashboard</title>
+  <title>Bridge Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
   <div class="container">
-    <h1>Bridge Monitor</h1>
-    <div class="network-status">
-      <div class="network-item">
-        <span>Bridge Volume:</span>
-        <span id="bridgeVolume">Loading...</span>
+    <div class="suspicious-actors-alert">
+      <h2>⚠️ Suspicious Activity Alert</h2>
+      <div id="suspiciousActors" class="actors-list">
+        Loading suspicious actors...
       </div>
-      <div class="network-item">
-        <span>ETH Gas:</span>
-        <span id="ethGas">Loading...</span>
+    </div>
+    <header class="dashboard-header">
+      <h1>Bridge Monitor</h1>
+      <div class="theme-toggle">
+        <button id="themeToggle" aria-label="Toggle theme">🌙</button>
       </div>
-      <div class="network-item">
-        <span>BSC Gas:</span>
-        <span id="bscGas">Loading...</span>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Bridge Volume</h3>
+        <div class="stat-value" id="bridgeVolume">Loading...</div>
       </div>
-      <div class="network-item">
-        <span>SOL Gas:</span>
-        <span id="solGas">Loading...</span>
+
+      <div class="stat-card">
+        <h3>ETH Gas</h3>
+        <div class="stat-value" id="ethGas">Loading...</div>
+      </div>
+
+      <div class="stat-card">
+        <h3>BSC Gas</h3>
+        <div class="stat-value" id="bscGas">Loading...</div>
+      </div>
+
+      <div class="stat-card">
+        <h3>SOL Gas</h3>
+        <div class="stat-value" id="solGas">Loading...</div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Radium Swaps</h3>
+        <div class="stat-value" id="radiumSwaps">Loading...</div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Jupiter Swaps</h3>
+        <div class="stat-value" id="jupiterSwaps">Loading...</div>
+      </div>
+    </div>
+
+    <div class="metrics-panel">
+      <h2>Swap Alerts</h2>
+      <div class="alerts-container">
+        <div class="alert-box" id="radiumAlerts">
+          <h3>Radium Alerts</h3>
+          <div class="alert-content">No active alerts</div>
+        </div>
+        <div class="alert-box" id="jupiterAlerts">
+          <h3>Jupiter Alerts</h3>
+          <div class="alert-content">No active alerts</div>
+        </div>
+      <div class="alert-box" id="priceAlerts">
+        <h3>Price Alerts</h3>
+        <div class="price-alert-form">
+          <input type="number" id="alertPrice" placeholder="Alert price in USD" step="0.01" min="0">
+          <select id="alertDirection">
+            <option value="above">Above</option>
+            <option value="below">Below</option>
+          </select>
+          <button onclick="setPriceAlert()" class="alert-btn">Set Alert</button>
+        </div>
+        <div class="alert-content" id="activeAlerts">No active price alerts</div>
+      </div>
+    </div>
+
+    <div class="metrics-panel">
+      <h2>Contract Checker</h2>
+      <div class="contract-checker">
+        <input type="text" id="contractInput" placeholder="Enter contract address" class="contract-input">
+        <button onclick="checkContract()" class="check-btn">Check</button>
+        <div id="contractResult" class="contract-result"></div>
+      </div>
+    </div>
+
+    <div class="metrics-panel">
+      <h2>Twitter Metrics</h2>
+      <div class="metrics-container">
+        <pre id="twitterMetrics">Loading...</pre>
+      </div>
+    </div>
+
+    <div class="donation-panel">
+      <h2>Support the Project</h2>
+      <div class="donation-container">
+        <p>Solana Donation Address:</p>
+        <div class="address-box" id="solanaAddress">
+          <code>3exD5qiykH8YqFjhMxg77KXjeFT4h9SqSxAWihxy92Rk</code>
+          <button onclick="copyAddress()" class="copy-btn">Copy</button>
+        </div>
       </div>
     </div>
   </div>

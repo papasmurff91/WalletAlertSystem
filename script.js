@@ -1,43 +1,39 @@
-// Server-side code
 const express = require('express');
 const session = require('express-session');
-const { OAuth } = require('oauth');
-const path = require('path');
-
+const OAuth = require('oauth').OAuth;
 const app = express();
 
 // Session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_session_secret',
+  secret: process.env.SESSION_SECRET || 'temp_session_secret',
   resave: false,
   saveUninitialized: true
 }));
 
-// Serve static files
-app.use(express.static(__dirname));
-app.use(express.json());
-
-// Twitter OAuth configuration
 const oauth = new OAuth(
   'https://api.twitter.com/oauth/request_token',
   'https://api.twitter.com/oauth/access_token',
   process.env.TWITTER_CONSUMER_KEY,
   process.env.TWITTER_CONSUMER_SECRET,
   '1.0A',
-  'http://localhost:5000/twitter/callback',
+  process.env.CALLBACK_URL || 'https://5f901225-7357-46a2-8838-d8c120a93a57-00-1kte8uzx4mpim.riker.replit.dev/twitter/callback',
   'HMAC-SHA1'
 );
 
-// Twitter OAuth routes
+app.get('/', (req, res) => {
+  res.send(`<a href="/twitter/login">Login with Twitter</a>`);
+});
+
 app.get('/twitter/login', (req, res) => {
   oauth.getOAuthRequestToken((error, oauthToken, oauthTokenSecret) => {
     if (error) {
-      console.error('Request Token Error:', error);
-      return res.status(500).send('Error getting OAuth request token');
+      console.error('Error getting OAuth request token:', error);
+      return res.status(500).send('Authentication failed');
     }
+
+    // Store token secret in session
     req.session.oauthTokenSecret = oauthTokenSecret;
-    const authURL = `https://api.twitter.com/oauth/authorize?oauth_token=${oauthToken}`;
-    res.redirect(authURL);
+    res.redirect(`https://api.twitter.com/oauth/authorize?oauth_token=${oauthToken}`);
   });
 });
 
@@ -45,78 +41,47 @@ app.get('/twitter/callback', (req, res) => {
   const { oauth_token, oauth_verifier } = req.query;
   const oauthTokenSecret = req.session.oauthTokenSecret;
 
+  if (!oauthTokenSecret) {
+    return res.status(400).send('No OAuth token found in session');
+  }
+
   oauth.getOAuthAccessToken(
     oauth_token,
     oauthTokenSecret,
     oauth_verifier,
-    (error, accessToken, accessTokenSecret, results) => {
+    (error, accessToken, accessTokenSecret) => {
       if (error) {
-        console.error('Access Token Error:', error);
-        return res.status(500).send('Error getting OAuth access token');
+        console.error('OAuth access token error:', error);
+        return res.status(500).send('Authentication failed');
       }
+
+      // Store tokens securely in session
       req.session.accessToken = accessToken;
       req.session.accessTokenSecret = accessTokenSecret;
-      res.redirect('/');
+
+      res.redirect('/dashboard'); // Redirect to dashboard instead of showing tokens
     }
   );
 });
 
-// API routes
-// Secure Twitter metrics request
-async function getTwitterMetrics() {
-  const username = process.env.TWITTER_USERNAME;
-  const password = process.env.TWITTER_PASSWORD;
-  const accountName = process.env.TWITTER_ACCOUNT_NAME;
-  
-  const auth = Buffer.from(`${username}:${password}`).toString('base64');
-  
-  try {
-    const response = await fetch(
-      `https://gnip-api.x.com/metrics/usage/accounts/${accountName}.json?bucket=month`,
-      {
-        headers: {
-          'Authorization': `Basic ${auth}`,
-          'Accept': 'application/json'
-        }
-      }
-    );
-    return await response.json();
-  } catch (error) {
-    console.error('Twitter metrics request failed:', error);
-    throw error;
+app.get('/dashboard', (req, res) => {
+  if (!req.session.accessToken) {
+    return res.redirect('/');
   }
-}
-
-app.get('/api/twitter-metrics', async (req, res) => {
-  try {
-    const metrics = await getTwitterMetrics();
-    res.json(metrics);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch Twitter metrics' });
-  }
+  res.send('Successfully authenticated with Twitter!');
 });
 
-app.get('/api/bridge-stats', (req, res) => {
-  const volume = Math.floor(Math.random() * 1000000);
-  const tx = Math.floor(Math.random() * 100);
-  res.json({ volume, tx });
-});
-
-app.get('/api/gas-prices', (req, res) => {
-  const networks = {
-    'ethGas': '50-60',
-    'bscGas': '5-7',
-    'solGas': '0.001'
-  };
-  res.json(networks);
-});
-
-// Serve index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-const PORT = 5000;
-app.listen(PORT, '0.0.0.0', () => {
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+}).on('error', (err) => {
+  console.error('Server error:', err);
+  process.exit(1);
+});
+
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Server shutdown complete');
+    process.exit(0);
+  });
 });
