@@ -17,5 +17,8 @@
     "oauth": "^0.10.2",
     "twitter-api-v2": "^1.23.0"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "webpack-cli": "^6.0.1"
+  }
 }
