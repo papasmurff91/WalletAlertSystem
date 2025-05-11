@@ -1,0 +1,31 @@
+From 7e4e0a98c9f9fdf27204ada29f85515f42d16fa1 Mon Sep 17 00:00:00 2001
+From: papasmurff91 <trntcunningham@gmail.com>
+Date: Sun, 11 May 2025 01:21:52 +0000
+Subject: [PATCH] Changes
+
+new
+---
+ .replit     | 2 +-
+ WalletAlert | 0
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+ create mode 100644 WalletAlert
+
+diff --git a/.replit b/.replit
+index a6014a3..70914e2 100644
+--- a/.replit
++++ b/.replit
+@@ -4,7 +4,7 @@ run = "node index.js"
+ 
+ [nix]
+ channel = "stable-24_05"
+-packages = ["yakut", "try", "zip"]
++packages = ["yakut", "try", "zip", "imagemagick"]
+ 
+ [deployment]
+ publicDir = "/"
+diff --git a/WalletAlert b/WalletAlert
+new file mode 100644
+index 0000000..e69de29
+-- 
+2.47.2
+
